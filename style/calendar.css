@@ -130,9 +130,9 @@ table.calControl td {
 
 .popup {
     position: absolute !important;
-    -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 
     background-color: #ffffff;
 }
@@ -272,6 +272,9 @@ th {
     background-color: #c2e4fe;
 }
 
+.eventHighlight div p {
+    color: #666666;
+}
 .searchDiv{
     width: 180px;
 
