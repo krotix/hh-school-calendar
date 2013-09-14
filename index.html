@@ -1,0 +1,703 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+    <meta charset="utf-8">
+
+    <script src="./script/moment.js"></script>
+    <script src="./script/ru.js"></script>
+
+    <script src="./script/calendar.js"></script>
+    <script src="./script/classList.js"></script>
+    <script src="./script/scroll.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="./style/calendar.css">
+    <link rel="stylesheet" type="text/css" href="./style/vScroll.css">
+    <link rel="stylesheet" type="text/css" href="./style/popup.css">
+
+    <meta charset="utf-8">
+</head>
+<body class="header">
+<div id="quickAdd" class="hidden">
+    <input id="addQuickly" style="width: 100%; margin-bottom: 10px;">
+
+    <button id="create" style="margin: 0px;">Создать</button>
+</div>
+
+<div id="add" class="hidden" style="width:250px;">
+    <input id="event" style="width: 100%; margin-bottom: 3px;">
+    <p id="eventP" class="eventP hidden"></p>
+    <input id="day" style="width: 100%; margin-bottom: 3px;">
+    <p id="dayP" class="dayP hidden"></p>
+    <input id="name" style="width: 100%; margin-bottom: 30px;">
+    <p id="nameP" class="nameP hidden"></p>
+
+    <textarea id="description" rows="6" style="width: 100%; margin-bottom: 15px; resize: none;"></textarea>
+    <button id="done" style="margin: 0px 10px 0px 0px;">Готово</button>
+    <button id="delete" style="margin: 0px;">Удалить</button>
+</div>
+
+<div>
+    <div id="header" style="margin: auto; height: 110px;">
+        <table style="float: left; margin-top: 50px;">
+            <tr>
+                <td>
+                    <div id="addButton" class="button">
+                        Добавить
+                    </div>
+                </td>
+                <td>
+                    <div id="refresh" class="button">
+                        Обновить
+                    </div>
+                </td>
+                <td style="width: 100%;">
+
+                </td>
+                <td>
+                    <img src="./img/search.png" style="padding-top: 4px;"/>
+                </td>
+                <td>
+                    <div style="width: 200px;">
+                        <input id="search" type="text"
+                               style="width:200px;">
+                        <span id="clear" class="hidden clear"><img src="./img/clear.png"/></span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="cal" style="margin: auto;"></div>
+
+   <div class="hidden" id="searchAutoComplite">
+         <div class="vScroll" id="vScroll">
+            <div class="vScrollContent" id="vScrollContent">
+                <div class="col1">
+                    <table id="searchList" style="margin-top: 0px;" class="searchList">
+                    </table>
+                </div>
+                <div class="col2" id="col2">
+                    <div class="scrollingTrack" id="scrollingTrack">
+                        <div id="scrollbar" class="scrollbar" style="top: 0px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+   </div>
+
+</div>
+
+<script>
+    //Добавление
+    var doneButton = document.getElementById("done");
+    var deleteButton = document.getElementById("delete");
+
+    function addClose(){
+        var hintClass = "hint";
+
+        var eventInput = document.getElementById("event");
+        var dayInput = document.getElementById("day");
+        var nameInput = document.getElementById("name");
+        var descriptionInput = document.getElementById("description");
+
+        //установка значенией поумолчанию
+        eventInput.value = eventInput.placeHolder.defaultText;
+        addClass(eventInput, hintClass);
+
+        dayInput.value = dayInput.placeHolder.defaultText;
+        addClass(dayInput, hintClass);
+
+        nameInput.value = nameInput.placeHolder.defaultText;
+        addClass(nameInput, hintClass);
+
+        descriptionInput.value = descriptionInput.placeHolder.defaultText;
+        addClass(descriptionInput, hintClass);
+
+        doneButton.removeEventListener("click", doneClick);
+        deleteButton.removeEventListener("click", deleteClick);
+        highlightedCell = null;
+    }
+
+    var doneClick;
+    var deleteClick;
+    //Инициализация
+    function addInit(o){
+
+        deleteClick = function(){
+            var eventToDelete = window.localStorage.getItem(highlightedCell.id);
+            if(eventToDelete){
+                window.localStorage.removeItem(highlightedCell.id);
+            }else{
+                alert("Нет объекта для удаления");
+            }
+        };
+
+        //добавление логики для создания
+        doneClick = function() {
+
+            var eventInput = document.getElementById("event");
+            var dayInput = document.getElementById("day");
+            var nameInput = document.getElementById("name");
+            var descriptionInput = document.getElementById("description");
+
+
+            if (!hasClass(eventInput, "hint") || !hasClass(dayInput, "hint") || !hasClass(nameInput, "hint") || !hasClass(descriptionInput, "hint")) {
+                var note = {};
+            }
+
+            if (!hasClass(eventInput, "hint")) {
+                note.event = eventInput.value;
+
+                eventP.innerHTML = "";
+                addClass(eventInput, "hidden");
+                removeClass(eventP, "hidden");
+                eventP.appendChild(document.createTextNode(eventInput.value));
+            }
+
+            if (!hasClass(dayInput, "hint")) {
+                note.day = dayInput.value;
+            }
+
+            if (!hasClass(nameInput, "hint")) {
+                note.name = nameInput.value;
+
+                var nameP = document.getElementById("nameP");
+                nameP.innerHTML = "";
+                addClass(nameInput, "hidden");
+                removeClass(nameP, "hidden");
+                var participants = document.createElement("p");
+                participants.appendChild(document.createTextNode("Участники:"));
+                addClass(participants, "greyText");
+                nameP.appendChild(participants);
+                nameP.appendChild(document.createTextNode(nameInput.value));
+
+            }
+
+            if (!hasClass(descriptionInput, "hint")) {
+                note.description = descriptionInput.textContent;
+            }
+
+            if (note) {
+                if(note.day){
+                    var date = setDate(note.day);
+                    localStorage.setItem(date.format("DDMMYYYY"), JSON.stringify(note));
+                }else{
+                    note.day = moment(o.id, "DDMMYYYY").toDate();
+                    localStorage.setItem(o.id, JSON.stringify(note));
+                }
+
+                dayP.innerHTML = "";
+                addClass(dayInput, "hidden");
+                removeClass(dayP, "hidden");
+                dayP.appendChild(document.createTextNode(moment(note.day).format("D MMMM")));
+//                information(o, note);
+            }
+        }
+
+        // логика добавления
+
+        doneButton.addEventListener("click", doneClick, false);
+        deleteButton.addEventListener("click", deleteClick, false);
+
+
+        var eventInput = document.getElementById("event");
+        var eventP = document.getElementById("eventP");
+        eventP.innerHTML ="";
+        addClass(eventP, "hidden");
+
+        var dayInput = document.getElementById("day");
+        var dayP = document.getElementById("dayP");
+        dayP.innerHTML ="";
+        addClass(dayP, "hidden");
+
+        var nameInput = document.getElementById("name");
+        var nameP = document.getElementById("nameP");
+        nameP.innerHTML ="";
+        addClass(nameP, "hidden");
+
+        var descriptionInput = document.getElementById("description");
+
+        var prevNote = JSON.parse(localStorage.getItem(o.id));
+        if (prevNote && prevNote.event) {
+            eventInput.className = "";
+            eventInput.value = prevNote.event;
+
+            addClass(eventInput, "hidden");
+            removeClass(eventP, "hidden");
+            eventP.appendChild(document.createTextNode(eventInput.value));
+        } else {
+            eventInput.value = eventInput.placeHolder.defaultText;
+            eventInput.className = "hint";
+        }
+
+        if (prevNote && prevNote.day) {
+            dayInput.className = "";
+            dayInput.value = prevNote.day;
+
+            addClass(dayInput, "hidden");
+            removeClass(dayP, "hidden");
+            dayP.appendChild(document.createTextNode(moment(dayInput.value).format("D MMMM")));
+        } else {
+            dayInput.value = dayInput.placeHolder.defaultText;
+            dayInput.className = "hint";
+        }
+
+        if (prevNote && prevNote.name) {
+            nameInput.className = "";
+            nameInput.value = prevNote.name;
+
+            addClass(nameInput, "hidden");
+            removeClass(nameP, "hidden");
+            var participants = document.createElement("p");
+            participants.appendChild(document.createTextNode("Участники:"));
+            addClass(participants, "greyText");
+            nameP.appendChild(participants);
+            nameP.appendChild(document.createTextNode(nameInput.value));
+
+        } else {
+            nameInput.value = nameInput.placeHolder.defaultText;
+            nameInput.className = "hint";
+        }
+
+        if (prevNote && prevNote.description) {
+            descriptionInput.className = "";
+            descriptionInput.value = prevNote.description;
+        } else {
+            descriptionInput.value = descriptionInput.placeHolder.defaultText;
+            descriptionInput.className = "hint"
+        }
+    }
+
+    function setDate(item){
+        var date = moment(item, "D MMMM YYYY");
+        var now = moment();
+
+        var dateArray = item.split(" ");
+        if (dateArray.length == 1) {
+            date.month(now.month());
+            date.year(now.year());
+        }
+
+        if (dateArray.length == 2) {
+            date.year(now.year());
+        }
+
+        return date;
+    }
+
+    //Быстрое добавление
+    function quickAddClose(){
+        var addButton = document.getElementById("addButton");
+        removeClass(addButton, "addButton");
+
+        var hintClass = "hint";
+
+        var quickInput = document.getElementById("addQuickly");
+        quickInput.value = quickInput.placeHolder.defaultText;
+        addClass(quickInput, hintClass);
+
+    }
+
+    var quickAddDiv;
+    //Добавление логики быстрого создания
+    function create() {
+        var quickInput = document.getElementById("addQuickly");
+
+        if (quickInput.value != quickInput.placeHolder.defaultText) {
+            var array = quickInput.value.split(",");
+
+//            var date = moment(array[0], "D MMMM YYYY");
+//            var now = moment();
+//
+//            var dateArray = array[0].split(" ");
+//            if (dateArray.length == 1) {
+//                date.month(now.month());
+//                date.year(now.year());
+//            }
+//
+//            if (dateArray.length == 2) {
+//                date.year(now.year());
+//            }
+            var date = setDate(array[0]);
+
+            quickAddClose();
+
+            createCalendar("cal", date.year(), date.month());
+
+            //TODO исправить присовение месяца
+            var day = document.getElementById(date.format("DD") + date.format("MM") + date.format("YYYY"));
+
+            quickAddDiv.close();
+
+            if(array.length > 1){
+                if(popup){
+                    popup.close();
+                }
+                popup = highlightPopup(day);
+                highlightedCell = day;
+
+                var eventInput = document.getElementById("event");
+                var eventP = document.getElementById("eventP");
+                addClass(eventInput, "hidden");
+                removeClass(eventP, "hidden");
+                eventP.appendChild(document.createTextNode(array[1]));
+
+                var dayInput = document.getElementById("day");
+                var dayP = document.getElementById("dayP");
+                if(array[0]){
+                    addClass(dayInput, "hidden");
+                    removeClass(dayP, "hidden");
+                    dayP.appendChild(document.createTextNode(date.format("D MMMM")));
+                }
+
+                var nameInput = document.getElementById("name");
+                var nameP = document.getElementById("nameP");
+                var descriptionInput = document.getElementById("description");
+            }else{
+                alert("Необходимо ввести день и событие");
+            }
+
+
+        }
+    }
+
+    var createButton = document.getElementById("create");
+    createButton.addEventListener("click", create, false);
+
+    //Поиск
+    placeHolder(document.getElementById("search"), "Событие, дата или участник");
+
+//    function searchInit(){
+////        createPopup(this, 'vScroll', false, true, null, init);
+//    }
+    var searchButton = document.getElementById("search");
+//    searchButton.addEventListener("click", searchInit, false);
+
+
+    var div;
+    var current;
+    function searchAutoComplite(event){
+        var self = this;
+
+        event = event || window.event;
+
+        var searchValue = this.value;
+
+        var clear = document.getElementById("clear");
+        clear.onclick = function(){
+            self.value = "";
+            addClass(clear, "hidden")
+
+            //проверить для ie9
+//            if (document.createEventObject)
+//            {
+//                // Создаем объект событие (для IE не обязательно, но полезно знать, чтоб
+//                // передавать "синтетические" свойства события обработчику(ам)):
+//                var evt = document.createEventObject();
+//                // Запускаем событие на элементе:
+//                self.fireEvent("onblur", evt);
+//            } else if (document.createEvent) {
+//                // Создаем объект событие:
+                var evt = document.createEvent("HTMLEvents");
+                // Инициализируем:
+                evt.initEvent("blur", false, false);
+                // Запускаем на элементе:
+                self.dispatchEvent(evt);
+//            }
+        }
+        if(searchValue != this.placeHolder.defaultText && searchValue){
+            removeClass(clear, "hidden")
+            clear.style.top = (offsetPosition(searchButton)[1] + 3) + "px";
+            clear.style.left = (searchButton.clientWidth + offsetPosition(searchButton)[0] - clear.clientWidth - 3) + "px";
+        }else{
+            self.value = "";
+            addClass(clear, "hidden");
+        }
+
+        function closeSearch(event){
+            if(current && current.currentTd){
+                unHighlightCurrent(document.getElementById(current.currentTd));
+            }
+        }
+
+        if (event.keyCode != 40 && event.keyCode != 38 && event.keyCode != 13){
+
+            if(!div){
+                div = createPopup(this, 'vScroll', false, true, closeSearch, init, true);
+            }
+
+            var eventArray = [];
+            if(searchValue != this.placeHolder.defaultText){
+                for(var event in window.localStorage){
+                    var eventValue = JSON.parse(localStorage.getItem(event));
+                    for(var item in eventValue){
+                        if( (~eventValue[item].indexOf(searchValue)) && searchValue ) {
+                            eventArray.push(event);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(eventArray.length){
+
+                var searchList = document.getElementById("searchList");
+                searchList.innerHTML = "";
+
+                for (var i = 0; i < eventArray.length; i++) {
+                    var obj = eventArray[i];
+                    var eventValue = JSON.parse(localStorage.getItem(obj));
+
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    var eventDiv = document.createElement('div');
+                    eventDiv.currentTd = obj;
+                    addClass(eventDiv, "searchDiv");
+
+                    var eventP = document.createElement("p");
+                    addClass(eventP, "event")
+                    eventP.appendChild(document.createTextNode(eventValue.event));
+                    eventDiv.appendChild(eventP);
+
+                    var eventDate = document.createElement("p");
+                    addClass(eventDate, "eventDate")
+                    eventDate.appendChild(document.createTextNode(moment(obj, "DDMMYYYY").format("D MMMM")));
+                    eventDiv.appendChild(eventDate);
+
+                    td.appendChild(eventDiv);
+                    tr.appendChild(td);
+                    searchList.appendChild(tr);
+
+                    //Выбор первого
+                    if(i == 0){
+                        current = eventDiv;
+                        removeClass(current, "searchDiv")
+                        addClass(current, "eventDiv");
+
+                        createCalendar('cal', moment(current.currentTd, "DDMMYYYY").year(), moment(current.currentTd, "DDMMYYYY").month());
+                        highlightCurrent(document.getElementById(current.currentTd));
+                    }
+                }
+
+//                var contentHeight = searchList.offsetHeight - 200;
+                var contentHeight;
+                var scrollBar = document.getElementById("col2");
+
+                removeClass(scrollBar, "hidden");
+                removeClass(searchList, "marginRight");
+                if(eventArray.length > 5){
+                    contentHeight = tr.offsetHeight*5;
+                    scrollBar.style.height = contentHeight - parseInt(getComputedStyle(scrollBar).paddingTop) - parseInt(getComputedStyle(scrollBar).paddingBottom) + "px";
+                }else{
+                    contentHeight = tr.offsetHeight*eventArray.length;
+                    scrollBar.style.height = 0 + "px";
+                    addClass(scrollBar, "hidden");
+                    addClass(searchList, "marginRight");
+                }
+
+
+                var scrollContent = document.getElementById("vScrollContent");
+                scrollContent.style.height = contentHeight - 1 + "px";
+
+                function searchChoosed(target){
+                    addClass(current, "searchDiv");
+                    removeClass(current, "eventDiv");
+                    addClass(target, "eventDiv");
+
+                    unHighlightCurrent(document.getElementById(current.currentTd));
+                    current = target;
+
+                    createCalendar('cal', moment(current.currentTd, "DDMMYYYY").year(), moment(current.currentTd, "DDMMYYYY").month());
+                    highlightCurrent(document.getElementById(current.currentTd));
+
+                    div.close();
+                    div = null;
+
+//                    outside = false;
+                    if(popup){
+                        popup.close();
+                    }
+                    popup = highlightPopup(document.getElementById(current.currentTd));
+                    highlightedCell = document.getElementById(current.currentTd);
+                }
+
+                //Клик вне дива
+                function hideDiv(event) {
+                    var outside = true;
+
+                    event = event || window.event;
+                    var target = event.target || event.srcElement;
+
+//                    if(hasClass(target, "eventDiv")){
+//                        alert("true");
+//
+//                        return;
+//                    }
+
+                    if(hasClass(target, "searchDiv") || hasClass(target, "eventDiv")){
+//                        removeClass(current, "eventDiv");
+//                        addClass(target, "eventDiv");
+//
+//                        unHighlightCurrent(document.getElementById(current.currentTd));
+//                        current = target;
+//                        highlightCurrent(document.getElementById(current.currentTd));
+//
+//                        div.close();
+//                        div = null;
+//
+//                        outside = false;
+//                        popup = highlightPopup(document.getElementById(current.currentTd));
+//                        highlightedCell = document.getElementById(current.currentTd);
+
+                        searchChoosed(target);
+
+                        return;
+                    }
+                    while (target != document.body) {
+
+                        if (hasClass(target, "popup") || target.id == "search") {
+                            outside = false;
+
+                            break;
+                        }
+                        target = target.parentNode;
+                    }
+
+                    if(outside){
+                        div.close();
+                        document.body.removeEventListener("click", hideDiv);
+
+                        div = null;
+                    }
+                }
+
+                document.body.addEventListener("click", hideDiv, false);
+
+            }else{
+                div.close();
+                div = null;
+            }
+
+            init();
+
+            //клавиатура
+            this.onkeydown = function(e){
+                if (e.keyCode == 38){
+                    e.preventDefault ? e.preventDefault() : (e.returnValue = false);
+                }
+
+                if(e.keyCode == 13){
+                    if(current){
+                        searchChoosed(current);
+
+                        e.preventDefault ? e.preventDefault() : (e.returnValue = false);
+                    }
+                }
+            };
+
+            this.onkeyup = function(e) {
+                e = e || window.event;
+
+                //Кнопка вниз
+                if (e.keyCode == 40){
+                    vertical.setStep()
+                    var currentPosition = parseInt(vertical.scroller.style.top);
+                    var newPosition = vertical.step + currentPosition;
+                    vertical.setPosition(newPosition);
+
+                    //Добавление переключиния с клавиатуры
+                    var tr = current.parentNode.parentNode;
+                    var nextTr = tr.nextSibling;
+                    if(nextTr){
+                        addClass(current, "searchDiv");
+                        removeClass(current, "eventDiv");
+
+                        var next = nextTr.getElementsByTagName("div")[0];
+                        addClass(next, "eventDiv");
+                        removeClass(next, "searchDiv");
+
+                        unHighlightCurrent(document.getElementById(current.currentTd));
+                        current = next;
+
+                        createCalendar('cal', moment(current.currentTd, "DDMMYYYY").year(), moment(current.currentTd, "DDMMYYYY").month());
+                        highlightCurrent(document.getElementById(current.currentTd));
+                    }
+
+                    return false;
+                }
+                if (e.keyCode == 38){
+                    vertical.setStep()
+                    var currentPosition = parseInt(vertical.scroller.style.top);
+                    var newPosition = currentPosition - vertical.step;
+                    vertical.setPosition(newPosition);
+
+                    //Добавление переключиния с клавиатуры
+                    var tr = current.parentNode.parentNode;
+                    var nextTr = tr.previousSibling;
+                    if(nextTr){
+                        addClass(current, "searchDiv");
+                        removeClass(current, "eventDiv");
+
+                        var next = nextTr.getElementsByTagName("div")[0];
+                        addClass(next, "eventDiv");
+                        removeClass(next, "searchDiv");
+
+                        unHighlightCurrent(document.getElementById(current.currentTd));
+                        current = next;
+
+                        createCalendar('cal', moment(current.currentTd, "DDMMYYYY").year(), moment(current.currentTd, "DDMMYYYY").month());
+                        highlightCurrent(document.getElementById(current.currentTd));
+                    }
+
+                    return false;
+                }
+                return true;
+            }
+
+        }
+
+    }
+//    function serCursor(){
+//            this.selectionStart = this.value.length;
+//    }
+//    searchButton.addEventListener("keydown", serCursor, false);
+    searchButton.addEventListener("keyup", searchAutoComplite, false);
+    searchButton.addEventListener("click", searchAutoComplite, false);
+
+    function addButtonClick(){
+        addClass(this, "addButton");
+        quickAddDiv = createPopup(this, 'quickAdd', false, false, quickAddClose);
+    }
+    var addButton = document.getElementById("addButton");
+    addButton.addEventListener("click", addButtonClick, false);
+
+    //Календарь
+    var now = new Date();
+    createCalendar('cal', now.getFullYear(), now.getMonth());
+
+    //Быстрое добавление
+    placeHolder(document.getElementById("addQuickly"), "5 марта, День рождение");
+
+    //Добавление
+    placeHolder(document.getElementById("event"), "Событие");
+    placeHolder(document.getElementById("day"), "День, месяц, год");
+    placeHolder(document.getElementById("name"), "Имена участников");
+    placeHolder(document.getElementById("description"), "Описание");
+
+    //Обновить
+    function refresh(){
+        var currentMonthAndYear = document.getElementById("monthAndYear");
+        createCalendar("cal", currentMonthAndYear.date.getFullYear(), currentMonthAndYear.date.getMonth());
+        if(popup){
+            popup.close();
+        }
+    }
+
+    var refreshButton = document.getElementById("refresh");
+    refreshButton.addEventListener("click", refresh, false);
+
+</script>
+</body>
+</html>
