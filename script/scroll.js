@@ -28,19 +28,15 @@ VerticalScroll = function (scroller, menu)
     {
         if(get(this.scroller) && get(this.menu))
         {
-            //Переписать
             this.scrollerTrackWidth = parseInt(document.getElementById("col2").style.height);
             this.menuWidth = parseInt(document.getElementById("vScrollContent").style.height);
-            //
 
             this.scroller = get(this.scroller);
             this.menu = get(this.menu);
 
             this.scroller.style.top = 0 + "px";
             this.menu.style.marginTop = 0 + "px";
-//            this.scrollerStartShift = parseInt(this.scroller.style.top);
             this.scrollerStartShift = 0;
-//            this.menuStartShift = parseInt(this.menu.style.marginTop);
             this.menuStartShift = 0;
 
             this.menuTrackWidth = this.menu.offsetHeight + this.menuStartShift;
@@ -70,7 +66,6 @@ VerticalScroll = function (scroller, menu)
 
     this.setStep = function()
     {
-        //this.step = Math.round(this.scrollerWidth / 3 * 2);
         this.step = Math.round(this.menu.getElementsByTagName("td")['0'].offsetHeight * this.scrollerTrackWidth / this.menuTrackWidth);
     }
 
@@ -215,51 +210,6 @@ function init()
     document.onmousemove = handleOnMouseMove;
     window.onmouseup = handleOnMouseUp;
     get('scrollingTrack').onclick = handleOnClickBarVertical;
-
-//    //клавиатура
-//    document.onkeyup = function(e) {
-//        //Кнопка вверж
-//        if (e.keyCode == 40){
-//            vertical.setStep()
-//            var currentPosition = parseInt(vertical.scroller.style.top);
-//            var newPosition = vertical.step + currentPosition;
-//            vertical.setPosition(newPosition);
-//
-//            //Добавление переключиния с клавиатуры
-//            var tr = current.parentNode.parentNode;
-//            var nextTr = tr.nextSibling;
-//            if(nextTr){
-//                removeClass(current, "eventDiv");
-//
-//                var next = nextTr.getElementsByTagName("div")[0];
-//                addClass(next, "eventDiv");
-//                current = next;
-//            }
-//
-//            return false;
-//        }
-//        if (e.keyCode == 38){
-//            vertical.setStep()
-//            var currentPosition = parseInt(vertical.scroller.style.top);
-//            var newPosition = currentPosition - vertical.step;
-//            vertical.setPosition(newPosition);
-//
-//            //Добавление переключиния с клавиатуры
-//            var tr = current.parentNode.parentNode;
-//            var nextTr = tr.previousSibling;
-//            if(nextTr){
-//                removeClass(current, "eventDiv");
-//
-//                var next = nextTr.getElementsByTagName("div")[0];
-//                addClass(next, "eventDiv");
-//                current = next;
-//            }
-//
-//            return false;
-//        }
-//        return true;
-//    }
-
 
     get('scrollbar').onmousedown = handleOnMouseDownVertical;
     get('scrollbar').onmouseup = handleOnMouseUp;

@@ -8,13 +8,10 @@
     background: #fff;
     overflow: hidden;
     height: 240px;
-    /*width: 300px;*/
-    /*border: 1px solid #000;*/
     position: relative;
 }
 
 .col1 {
-    /*width: 200px;*/
     float: left;
     overflow: hidden;
 }
@@ -29,12 +26,10 @@
 
 .vScroll table {
     border-collapse: collapse;
-    /*font-size: 1.1em;*/
     margin-left: 9px;
 }
 
 .vScroll table td {
-    /*padding: 10px 0 5px 0;*/
     text-align: left;
     color: #000;
 }
@@ -61,6 +56,5 @@
 }
 
 .searchList td {
-    /*padding:0.25em;*/
     border-bottom:1px solid #ebebeb;
 }

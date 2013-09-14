@@ -70,7 +70,7 @@ function createPopup(o, contentId, leftArrow, closeHidden, closeFunction, initFu
         obj.style.top = (offsetPosition(o)[1] - 15) + 'px';
         obj.style.left = (offsetPosition(o)[0] + o.offsetWidth + 15) + 'px';
     }else{
-        addClass(obj, "uparrowdiv");
+//        addClass(obj, "uparrowdiv");
         obj.style.top = (offsetPosition(o)[1] + o.offsetHeight + 10) + 'px';
         obj.style.left = offsetPosition(o)[0] + 'px';
 

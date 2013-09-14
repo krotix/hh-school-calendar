@@ -3,24 +3,6 @@
 }
 
 .uparrowdiv:after {
-    /*content: '';*/
-    /*display: block;*/
-    /*position: absolute;*/
-    /*left: 20px;*/
-    /*top: -7px;*/
-    /*width: 14px;*/
-    /*height: 14px;*/
-    /*border-width: 1px;*/
-    /*border-style: solid none none solid !important;*/
-    /*border-color: #CCC;*/
-    /*background-color: #fff;*/
-    /*box-shadow: -2px -2px 3.5px rgba(204, 204, 204, .5);*/
-    /*-webkit-box-shadow: -2px -2px 3.5px rgba(204, 204, 204, .5);*/
-    /*-moz-box-shadow: -2px -2px 3.5px rgba(204, 204, 204, .5);*/
-    /*transform: rotate(45deg) !important;*/
-    /*-ms-transform: rotate(45deg);*/
-    /*-webkit-transform: rotate(45deg);*/
-    /*-moz-transform: rotate(45deg);*/
 }
 
 .leftarrowdiv:after {
@@ -52,7 +34,6 @@
     top: -20px;
     position: absolute;
     overflow: hidden;
-    /*box-shadow: 0 16px 10px -15px rgba(0,0,0,0.5);*/
     z-index: 2
 }
 .triangle-with-shadow:after {

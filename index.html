@@ -308,25 +308,12 @@
         if (quickInput.value != quickInput.placeHolder.defaultText) {
             var array = quickInput.value.split(",");
 
-//            var date = moment(array[0], "D MMMM YYYY");
-//            var now = moment();
-//
-//            var dateArray = array[0].split(" ");
-//            if (dateArray.length == 1) {
-//                date.month(now.month());
-//                date.year(now.year());
-//            }
-//
-//            if (dateArray.length == 2) {
-//                date.year(now.year());
-//            }
             var date = setDate(array[0]);
 
             quickAddClose();
 
             createCalendar("cal", date.year(), date.month());
 
-            //TODO исправить присовение месяца
             var day = document.getElementById(date.format("DD") + date.format("MM") + date.format("YYYY"));
 
             quickAddDiv.close();
@@ -369,11 +356,7 @@
     //Поиск
     placeHolder(document.getElementById("search"), "Событие, дата или участник");
 
-//    function searchInit(){
-////        createPopup(this, 'vScroll', false, true, null, init);
-//    }
     var searchButton = document.getElementById("search");
-//    searchButton.addEventListener("click", searchInit, false);
 
 
     var div;
@@ -390,22 +373,11 @@
             self.value = "";
             addClass(clear, "hidden")
 
-            //проверить для ie9
-//            if (document.createEventObject)
-//            {
-//                // Создаем объект событие (для IE не обязательно, но полезно знать, чтоб
-//                // передавать "синтетические" свойства события обработчику(ам)):
-//                var evt = document.createEventObject();
-//                // Запускаем событие на элементе:
-//                self.fireEvent("onblur", evt);
-//            } else if (document.createEvent) {
-//                // Создаем объект событие:
                 var evt = document.createEvent("HTMLEvents");
                 // Инициализируем:
                 evt.initEvent("blur", false, false);
                 // Запускаем на элементе:
                 self.dispatchEvent(evt);
-//            }
         }
         if(searchValue != this.placeHolder.defaultText && searchValue){
             removeClass(clear, "hidden")
@@ -481,7 +453,6 @@
                     }
                 }
 
-//                var contentHeight = searchList.offsetHeight - 200;
                 var contentHeight;
                 var scrollBar = document.getElementById("col2");
 
@@ -515,7 +486,6 @@
                     div.close();
                     div = null;
 
-//                    outside = false;
                     if(popup){
                         popup.close();
                     }
@@ -530,27 +500,7 @@
                     event = event || window.event;
                     var target = event.target || event.srcElement;
 
-//                    if(hasClass(target, "eventDiv")){
-//                        alert("true");
-//
-//                        return;
-//                    }
-
                     if(hasClass(target, "searchDiv") || hasClass(target, "eventDiv")){
-//                        removeClass(current, "eventDiv");
-//                        addClass(target, "eventDiv");
-//
-//                        unHighlightCurrent(document.getElementById(current.currentTd));
-//                        current = target;
-//                        highlightCurrent(document.getElementById(current.currentTd));
-//
-//                        div.close();
-//                        div = null;
-//
-//                        outside = false;
-//                        popup = highlightPopup(document.getElementById(current.currentTd));
-//                        highlightedCell = document.getElementById(current.currentTd);
-
                         searchChoosed(target);
 
                         return;
@@ -659,10 +609,6 @@
         }
 
     }
-//    function serCursor(){
-//            this.selectionStart = this.value.length;
-//    }
-//    searchButton.addEventListener("keydown", serCursor, false);
     searchButton.addEventListener("keyup", searchAutoComplite, false);
     searchButton.addEventListener("click", searchAutoComplite, false);
 
